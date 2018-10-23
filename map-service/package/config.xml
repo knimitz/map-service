@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" id="simple-egl" version="0.1">
+  <name>SIMPLE-EGL</name>
+  <icon src="icon.svg"/>
+  <content src="bin/simple-egl" type="application/vnd.agl.native"/>
+  <description>This is a demo application for simple-egl</description>
+  <author>TOYOA</author>
+  <license>APL 2.0 + MIT</license>
+  <feature name="urn:AGL:widget:required-api">
+    <param name="homescreen" value="ws" />
+    <param name="windowmanager" value="ws" />
+    <param name="libmap-service-binding.so" value="local" />
+  </feature>
+  <feature name="urn:AGL:widget:required-permission">
+    <param name="urn:AGL:permission::public:no-htdocs" value="required" />
+    <param name="urn:AGL:permission::public:hidden" value="required" />
+  </feature>
+</widget>
