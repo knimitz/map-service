@@ -20,7 +20,7 @@ pkg_check_modules(AFB REQUIRED afb-daemon)
 pkg_check_modules(SD REQUIRED libsystemd>=222)
 
 add_library(${TARGET_PUB_LIB} MODULE
-    tuto-3.cpp)
+    map-public-binding.cpp)
 
 target_include_directories(${TARGET_PUB_LIB}
     PRIVATE
