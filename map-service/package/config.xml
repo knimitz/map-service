@@ -7,12 +7,17 @@
   <author>TOYOA</author>
   <license>APL 2.0 + MIT</license>
   <feature name="urn:AGL:widget:required-api">
-    <param name="homescreen" value="ws" />
     <param name="windowmanager" value="ws" />
-    <param name="libmap-service-binding.so" value="local" />
+  </feature>
+  <feature name="urn:AGL:widget:required-binding">
+    <param name="libmap-service-binding.so" value="ws" />
+    <param name="libmap-local-binding.so" value="local" />
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />
     <param name="urn:AGL:permission::public:hidden" value="required" />
+  </feature>
+  <feature name="urn:AGL:widget:provided-api">
+    <param name="map-service" value="ws" />
   </feature>
 </widget>
