@@ -23,7 +23,8 @@ pkg_check_modules(SD REQUIRED libsystemd>=222)
 ### Create public binding
 
 add_library(${TARGET_PUB_LIB} MODULE
-    map-public-binding.cpp)
+    map-public-binding.cpp
+    map-client.cpp)
 
 target_include_directories(${TARGET_PUB_LIB}
     PRIVATE
