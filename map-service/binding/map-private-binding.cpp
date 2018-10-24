@@ -67,6 +67,7 @@ static void provide_surface(afb_req_t r) {
 
     // Call Window Manager verb
 
+
     // Store uuid
 
     // Notify app of uuid with request id
@@ -99,4 +100,4 @@ const afb_verb_t verbs[] = {
 };
 
 const afb_binding_t afbBindingExport =
-    afb::binding("map_service", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);
+    afb::binding("map_private", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);
