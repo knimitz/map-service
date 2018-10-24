@@ -29,14 +29,20 @@
 
 using std::string;
 
-afb::event new_request;
+afb::event new_request, map_created;
 
 static void request_map(afb_req_t r) {
     AFB_DEBUG(__FUNCTION__);
     json_object *args, *jtype;
     afb::req req(r);
-
     args = req.json();
+    if(json_object_object_get_ex(args, "type", jtype) && req.context() == nullptr) {
+        string type = json_object_get_string(jtype);
+        if(type == "local") {
+            req.subscribe(map_created);
+        }
+    }
+
     // push event to UI process for service surface
     new_request.push(args);
 
@@ -48,6 +54,12 @@ static void start_service(afb_req_t r) {
     afb::req req(r);
 
     req.subscribe(new_request);
+    /* if(json_object_object_get_ex(args, "type", jtype) && req.context() == nullptr) {
+        string type = json_object_get_string(jtype);
+        if(type == "local") {
+            req.subscribe(map_created);
+        }
+    } */
     req.success();
 }
 
@@ -83,6 +95,7 @@ int preinit(afb_api_t api) {
 int init(afb_api_t api) {
     AFB_NOTICE(__FUNCTION__);
     new_request = afb_daemon_make_event("new_request");
+    map_created = afb_daemon_make_event("map_created");
     return 0;
 }
 
