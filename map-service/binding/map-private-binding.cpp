@@ -106,8 +106,8 @@ void on_event(afb_api_t api, const char* event, struct json_object *object)
 
 const afb_verb_t verbs[] = {
     afb::verb("start_service", start_service, "start service", AFB_SESSION_LOA_0),
-    afb::verb("stop_service", stopt_service, "stop service", AFB_SESSION_LOA_1),
-    afb::verb("provide_surface", provide_service, "stop service", AFB_SESSION_LOA_1),
+    afb::verb("stop_service", stopt_service, "stop service", AFB_SESSION_LOA_0),
+    afb::verb("provide_surface", provide_service, "stop service", AFB_SESSION_LOA_0),
     afb::verb("request_map", request_map, "receive request from public", AFB_SESSION_LOA_0),
     afb::verbend()
 };
