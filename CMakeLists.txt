@@ -26,3 +26,7 @@ set(CMAKE_BUILD_TYPE Debug)
 find_package(PkgConfig REQUIRED)
 
 add_subdirectory(map-service)
+
+add_custom_target(package DEPENDS ${PROJECT_BINARY_DIR}/package
+   COMMAND wgtpkg-pack -f -o ${PROJECT_BINARY_DIR}/map-service.wgt ${PROJECT_BINARY_DIR}/package/root
+)

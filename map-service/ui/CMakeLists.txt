@@ -48,6 +48,6 @@ add_executable(simple-egl ${DIR_SRCS})
 TARGET_LINK_LIBRARIES(simple-egl ${LIBRARIES})
 
 add_custom_command(TARGET simple-egl POST_BUILD
-   COMMAND mkdir -p ${PROJECT_BINARY_DIR}/package/bin
-   COMMAND cp -f ${PROJECT_BINARY_DIR}/map-service/ui/simple-egl ${PROJECT_BINARY_DIR}/package/bin
+   COMMAND mkdir -p ${PROJECT_BINARY_DIR}/package/root/bin
+   COMMAND cp -f ${PROJECT_BINARY_DIR}/map-service/ui/simple-egl ${PROJECT_BINARY_DIR}/package/root/bin
    )
