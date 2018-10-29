@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" id="simple-egl" version="0.1">
-  <name>SIMPLE-EGL</name>
+<widget xmlns="http://www.w3.org/ns/widgets" id="map-service" version="0.1">
+  <name>map-service</name>
   <icon src="icon.svg"/>
   <content src="bin/simple-egl" type="application/vnd.agl.native"/>
   <description>This is a demo application for simple-egl</description>
