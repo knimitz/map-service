@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 
-project(map-service C CXX)
-
 set(PROJECT_NAME "map-service")
 set(PROJECT_VERSION "1.0")
 set(PROJECT_PRETTY_NAME "SE")
@@ -48,3 +46,8 @@ add_executable(simple-egl ${DIR_SRCS})
 
 #add link library
 TARGET_LINK_LIBRARIES(simple-egl ${LIBRARIES})
+
+add_custom_command(TARGET simple-egl POST_BUILD
+   COMMAND mkdir -p ${PROJECT_BINARY_DIR}/package/bin
+   COMMAND cp -f ${PROJECT_BINARY_DIR}/map-service/ui/simple-egl ${PROJECT_BINARY_DIR}/package/bin
+   )
