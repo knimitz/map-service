@@ -105,6 +105,5 @@ add_custom_command(TARGET ${TARGET_PUB_LIB} POST_BUILD
    )
 
 add_custom_command(TARGET ${TARGET_LOCAL_LIB} POST_BUILD
-   COMMAND mkdir -p ${PROJECT_BINARY_DIR}/package/root/lib
    COMMAND cp -f ${PROJECT_BINARY_DIR}/map-service/binding/lib${TARGET_LOCAL_LIB}.so ${PROJECT_BINARY_DIR}/package/root/lib
    )
