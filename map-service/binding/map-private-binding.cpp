@@ -113,4 +113,4 @@ const afb_verb_t verbs[] = {
 };
 
 const afb_binding_t afbBindingExport =
-    afb::binding("map_private", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);
+    afb::binding("map-private", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);

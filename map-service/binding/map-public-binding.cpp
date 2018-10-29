@@ -124,4 +124,4 @@ const afb_verb_t verbs[] = {
 };
 
 const afb_binding_t afbBindingExport =
-    afb::binding("map_service", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);
+    afb::binding("map-service", verbs, "map service surface", init, nullptr, on_event, false, preinit, nullptr);
