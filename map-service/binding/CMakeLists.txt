@@ -63,7 +63,7 @@ set_target_properties(${TARGET_PUB_LIB}
 ### Create public binding
 
 add_library(${TARGET_LOCAL_LIB} MODULE
-    map-public-binding.cpp)
+    map-private-binding.cpp)
 
 target_include_directories(${TARGET_LOCAL_LIB}
     PRIVATE

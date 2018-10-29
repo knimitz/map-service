@@ -36,7 +36,8 @@ static void request_map(afb_req_t r) {
     json_object *args, *jtype;
     afb::req req(r);
     args = req.json();
-    if(json_object_object_get_ex(args, "type", jtype) && req.context() == nullptr) {
+    /* const auto ctxt = req.context(); */
+    if(json_object_object_get_ex(args, "type", &jtype)/*  && (req.context() == nullptr) */) {
         string type = json_object_get_string(jtype);
         if(type == "local") {
             req.subscribe(map_created);
@@ -63,7 +64,7 @@ static void start_service(afb_req_t r) {
     req.success();
 }
 
-static void stop_service(afb_req_t t) {
+static void stop_service(afb_req_t r) {
     AFB_DEBUG(__FUNCTION__);
     afb::req req(r);
 
@@ -106,8 +107,8 @@ void on_event(afb_api_t api, const char* event, struct json_object *object)
 
 const afb_verb_t verbs[] = {
     afb::verb("start_service", start_service, "start service", AFB_SESSION_LOA_0),
-    afb::verb("stop_service", stopt_service, "stop service", AFB_SESSION_LOA_0),
-    afb::verb("provide_surface", provide_service, "stop service", AFB_SESSION_LOA_0),
+    afb::verb("stop_service", stop_service, "stop service", AFB_SESSION_LOA_0),
+    afb::verb("provide_surface", provide_surface, "stop service", AFB_SESSION_LOA_0),
     afb::verb("request_map", request_map, "receive request from public", AFB_SESSION_LOA_0),
     afb::verbend()
 };
