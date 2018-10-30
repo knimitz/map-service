@@ -35,6 +35,8 @@ using std::unordered_map;
 using std::shared_ptr;
 
 static string my_role = "Map.";
+static const char* wm_api = "windowmanager";
+static const char* mp_prv_api = "map-private";
 static int service_id = 0;
 static unordered_map<string, shared_ptr<MapClient>> client_list;
 
@@ -42,7 +44,6 @@ static void request_map(afb_req_t r) {
     AFB_DEBUG(__FUNCTION__);
     char* error, *info;
     int surface = -1;
-    bool ret = false;
     string service = my_role + std::to_string(++service_id);
     json_object *args, *wm_arg, *resp, *jsurface, *juuid;
     afb::req req(r);
@@ -52,13 +53,26 @@ static void request_map(afb_req_t r) {
 
     // Call window manager verb to attach service surface to the caller
     char* app_id = req.get_application_id();
+    if(app_id == nullptr) {
+        req.fail("application id is not set");
+        return;
+    }
     json_object_object_add(wm_arg, "destination", json_object_new_string(app_id));
     json_object_object_add(wm_arg, "service_surface", json_object_new_string(service.c_str()));
     // If UI process with this security context uses ivi surface id,
     // add "request_surface_id" parameter to the argument
     json_object_object_add(wm_arg, "request_surface_id", json_object_new_boolean(true));
 
-    ret = afb::callsync("windowmanager", "attachSurfaceToApp", wm_arg, resp, error, info);
+    AFB_DEBUG("%s", json_object_get_string(wm_arg));
+
+    afb::callsync(wm_api, "attachSurfaceToApp", wm_arg, resp, error, info);
+
+    AFB_INFO("%s", json_object_get_string(resp));
+
+    /* if(ret == false) {
+        req.fail("failed to call window manager verb");
+        return;
+    } */
 
     // Unpack response from WM
     if(json_object_object_get_ex(resp, "surface", &jsurface) &&
@@ -71,16 +85,23 @@ static void request_map(afb_req_t r) {
     }
 
     // Request the UI process to create surface
-    ret = afb::callsync("map_private", "request_map", args, resp, error, info);
-    if(ret) {
-        req.success();
-        if(client_list.count(app_id) == 0) {
-            shared_ptr<MapClient> client = std::make_shared<MapClient>();
-            client_list[app_id] = client;
-        }
-    }
-    else {
-        req.fail();
+    json_object* j_ui_req = json_object_new_object();
+    json_object_put(resp);
+    resp = json_object_new_object();
+    json_object_object_add(j_ui_req, "surface", json_object_new_int(surface));
+
+    // ========= Add some request to ui here ===========
+
+    // =================================================
+
+    afb::callsync(mp_prv_api, "request_map", j_ui_req, resp, error, info);
+    req.success();
+    AFB_INFO("%s", json_object_get_string(resp));
+    AFB_INFO("%s : %s", error, info);
+
+    if(client_list.count(app_id) == 0) {
+        shared_ptr<MapClient> client = std::make_shared<MapClient>();
+        client_list[app_id] = client;
     }
 }
 
