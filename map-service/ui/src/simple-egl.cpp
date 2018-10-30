@@ -60,8 +60,8 @@ uint32_t g_id_ivisurf = 9009;
 long port = 1700;
 string token = string("wm");
 
-string app_name = string("HVAC");
-const char* main_role = "hvac";
+string app_name = string("map-service");
+const char* main_role = "map-service";
 
 LibHomeScreen* hs;
 LibWindowmanager *wm;
