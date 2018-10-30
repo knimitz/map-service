@@ -23,11 +23,19 @@
 
 #ifndef MAP_CLIENT_H
 #define MAP_CLIENT_H
+#include <string>
+#define AFB_BINDING_VERSION 3
+#include <afb/afb-binding>
+
+struct json_object;
 
 class MapClient {
   public:
-    MapClient() = default;
+    MapClient(afb::req req);
     ~MapClient() = default;
+    void push_map_created(json_object* resp);
+  private:
+    afb::event map_created;
 };
 
 #endif

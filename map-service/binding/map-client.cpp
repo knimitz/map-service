@@ -22,4 +22,16 @@
  */
 
 #include "map-client.h"
+#include <json-c/json.h>
+
+static const char mp_created[] = "map_created";
+
+MapClient::MapClient(afb::req req) {
+    this->map_created = afb::make_event(mp_created);
+    req.subscribe(this->map_created);
+}
+
+void MapClient::push_map_created(json_object* content) {
+    this->map_created.push(content);
+}
 

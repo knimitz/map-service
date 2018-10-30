@@ -34,84 +34,42 @@ using std::string;
 using std::unordered_map;
 using std::shared_ptr;
 
-static string my_role = "Map.";
-static const char* wm_api = "windowmanager";
-static const char* mp_prv_api = "map-private";
-static int service_id = 0;
-static unordered_map<string, shared_ptr<MapClient>> client_list;
+static const char _mp_prv_api[] = "map-private";
+static const char _verb_req_map[] = "request_map";
+static const char _key_appid[] = "appid";
+static const char _key_uuid[] = "uuid";
+static const char _key_mp_sfc[] = "map_surface";
+static unordered_map<string, shared_ptr<MapClient>> _client_list;
 
 static void request_map(afb_req_t r) {
     AFB_DEBUG(__FUNCTION__);
-    char* error, *info;
-    int surface = -1;
-    string service = my_role + std::to_string(++service_id);
-    json_object *args, *wm_arg, *resp, *jsurface, *juuid;
+    char *app_id, *error, *info;
+    json_object *args, *resp, *jsurface, *juuid;
     afb::req req(r);
-
     args = req.json();
-    wm_arg = json_object_new_object();
+    app_id = req.get_application_id();
+    json_object_object_add(args, _key_appid, json_object_new_string(app_id));
+    json_object_get(args); // +1 for reference to json_object
 
-    // Call window manager verb to attach service surface to the caller
-    char* app_id = req.get_application_id();
-    if(app_id == nullptr) {
-        req.fail("application id is not set");
-        return;
-    }
-    json_object_object_add(wm_arg, "destination", json_object_new_string(app_id));
-    json_object_object_add(wm_arg, "service_surface", json_object_new_string(service.c_str()));
-    // If UI process with this security context uses ivi surface id,
-    // add "request_surface_id" parameter to the argument
-    json_object_object_add(wm_arg, "request_surface_id", json_object_new_boolean(true));
-
-    AFB_DEBUG("%s", json_object_get_string(wm_arg));
-
-    afb::callsync(wm_api, "attachSurfaceToApp", wm_arg, resp, error, info);
-
-    AFB_INFO("%s", json_object_get_string(resp));
-
-    /* if(ret == false) {
-        req.fail("failed to call window manager verb");
-        return;
-    } */
-
-    // Unpack response from WM
-    if(json_object_object_get_ex(resp, "surface", &jsurface) &&
-       json_object_object_get_ex(resp, "uuid", &juuid)) {
-        surface = json_object_get_int(jsurface);
-    }
-    else {
-        req.fail();
-        return;
-    }
-
-    // Request the UI process to create surface
-    json_object* j_ui_req = json_object_new_object();
-    json_object_put(resp);
-    resp = json_object_new_object();
-    json_object_object_add(j_ui_req, "surface", json_object_new_int(surface));
-
-    // ========= Add some request to ui here ===========
-
-    // =================================================
-
-    afb::callsync(mp_prv_api, "request_map", j_ui_req, resp, error, info);
-    req.success();
-    AFB_INFO("%s", json_object_get_string(resp));
+    afb::callsync(_mp_prv_api, _verb_req_map, args, resp, error, info);
     AFB_INFO("%s : %s", error, info);
+    AFB_INFO("%s", json_object_get_string(resp));
 
-    if(client_list.count(app_id) == 0) {
-        shared_ptr<MapClient> client = std::make_shared<MapClient>();
-        client_list[app_id] = client;
+    if(_client_list.count(app_id) == 0) {
+        shared_ptr<MapClient> client = std::make_shared<MapClient>(req);
+        _client_list[app_id] = client;
     }
+    req.success();
 }
 
 static void on_map_created(const char* app, const char* uuid) {
     // Get client object
-    auto client = client_list[app];
+    auto client = _client_list[app];
     json_object* resp = json_object_new_object();
-    json_object_object_add(resp, "map_surface", json_object_new_string(uuid));
-    // afb::req req = client->get_req(uuid);
-    // req.success(resp);
+    json_object_object_add(resp, _key_mp_sfc, json_object_new_string(uuid));
+    client->push_map_created(resp);
+    /* afb::req req = client->get_req(uuid);
+    req.success(resp); */
 }
 
 int preinit(afb_api_t api) {
@@ -130,8 +88,8 @@ void on_event(afb_api_t api, const char* event, struct json_object *object)
     json_object *juuid, *jappid;
     if(string(event) == "map_created")
     {
-        if(json_object_object_get_ex(object, "uuid", &juuid) &&
-           json_object_object_get_ex(object, "appid", &jappid)) {
+        if(json_object_object_get_ex(object, _key_uuid, &juuid) &&
+           json_object_object_get_ex(object, _key_appid, &jappid)) {
             const char* appid = json_object_get_string(jappid);
             const char* surface_uuid = json_object_get_string(juuid);
             on_map_created(appid, surface_uuid);
