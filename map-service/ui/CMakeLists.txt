@@ -36,7 +36,6 @@ SET(LIBRARIES
     libwayland-egl.so
     libwayland-client.so
     libjson-c.so
-    libhomescreen.so
     librt.so
     libpthread.so
 )

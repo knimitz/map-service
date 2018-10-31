@@ -48,7 +48,6 @@
 #include <time.h>
 
 #include <libwindowmanager.h>
-#include <libhomescreen.hpp>
 
 #include <ilm/ivi-application-client-protocol.h>
 #include "hmi-debug.h"
@@ -63,7 +62,6 @@ string token = string("wm");
 string app_name = string("map-service");
 const char* main_role = "map-service";
 
-LibHomeScreen* hs;
 LibWindowmanager *wm;
 
 static const struct wl_interface *types[] = {
@@ -562,28 +560,6 @@ init_wm(LibWindowmanager *wm, struct window *window)
 }
 
 int
-init_hs(LibHomeScreen* hs){
-	if(hs->init(port, token)!=0)
-	{
-		HMI_ERROR(log_prefix,"homescreen init failed. ");
-		return -1;
-	}
-
-	hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [](json_object *object){
-		const char *application_name = json_object_get_string(
-			json_object_object_get(object, "application_name"));
-		HMI_DEBUG(log_prefix,"Event_TapShortcut application_name = %s ", application_name);
-		if(strcmp(application_name, app_name.c_str()) == 0)
-		{
-			HMI_DEBUG(log_prefix,"try to activesurface %s ", app_name.c_str());
-			wm->activateWindow(main_role);
-		}
-	});
-
-	return 0;
-}
-
-int
 main(int argc, char **argv)
 {
 	struct sigaction sigint;
@@ -618,18 +594,6 @@ main(int argc, char **argv)
 
 	wm = new LibWindowmanager();
 	if(init_wm(wm, &window)!=0){
-		fini_egl(&display);
-		if (display.ivi_application)
-			ivi_application_destroy(display.ivi_application);
-		if (display.compositor)
-			wl_compositor_destroy(display.compositor);
-		wl_registry_destroy(display.registry);
-		wl_display_flush(display.display);
-		return -1;
-	}
-
-	hs = new LibHomeScreen();
-	if(init_hs(hs)!=0){
 		fini_egl(&display);
 		if (display.ivi_application)
 			ivi_application_destroy(display.ivi_application);
