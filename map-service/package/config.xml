@@ -15,7 +15,7 @@
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />
-    <!--param name="urn:AGL:permission::public:hidden" value="required" /-->
+    <param name="urn:AGL:permission::public:hidden" value="required" />
   </feature>
   <feature name="urn:AGL:widget:provided-api">
     <param name="map-service" value="ws" />
