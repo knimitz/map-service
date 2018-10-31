@@ -57,10 +57,10 @@ using namespace std;
 const char* log_prefix = "simple-egl";
 uint32_t g_id_ivisurf = 9009;
 long port = 1700;
-string token = string("wm");
-
-string app_name = string("map-service");
-const char* main_role = "map-service";
+static string token = string("wm");
+static string app_name = string("map-service");
+static const char* main_role = "map-service";
+Binding bdg;
 
 static const struct wl_interface *types[] = {
         NULL,

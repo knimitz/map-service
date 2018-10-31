@@ -57,10 +57,10 @@ typedef struct NewRequest {
     unsigned surface_id;
 } NewRequest;
 
-class WMHandler {
+class MyHandler {
   public:
-    WMHandler();
-    ~WMHandler() = default;
+    MyHandler() {}
+    ~MyHandler() = default;
 
     using sync_draw_handler = std::function<void(const char*, const char*, Rect)>;
     using reply_handler = std::function<void(json_object*)>;
@@ -79,12 +79,12 @@ public:
     Binding(const Binding &) = delete;
     Binding &operator=(const Binding &) = delete;
     int init(int port, const std::string& token);
-    void set_event_handler(const WMHandler& wmh);
+    void set_event_handler(const MyHandler& wmh);
     void subscribe_events();
 
     using handler_asyncSetSourceState = std::function<void(int sourceID, int handle)>;
 
-    int call(const std::string& verb, struct json_object* arg);
+    int call(const std::string& api, const std::string& verb, struct json_object* arg);
 
 private:
     int run_eventloop();
@@ -96,12 +96,12 @@ private:
     void (*onReply)(struct json_object* reply);
     void (*onHangup)(void);
 
-    struct afb_wsj1* sp_websock;
+    struct afb_wsj1* wsj1;
     struct afb_wsj1_itf minterface;
     sd_event* mploop;
     int mport;
     std::string mtoken;
-    WMHandler _wmh;
+    MyHandler _wmh;
 
 public:
     /* Don't use/ Internal only */

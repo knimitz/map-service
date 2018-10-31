@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <thread>
 #include <errno.h>
-#include <binding.hpp>
+#include "binding.hpp"
 
 #define ELOG(args,...) _ELOG(__FUNCTION__,__LINE__,args,##__VA_ARGS__)
 #ifdef DEBUGMODE
@@ -40,6 +40,9 @@ static const char _sync_draw[] = "syncDraw";
 static const char g_kKeyDrawingName[] = "drawing_name";
 static const char g_kKeyDrawingArea[] = "drawing_area";
 static const char g_kKeyDrawingRect[] = "drawing_rect";
+static const char g_kKeySurface[] = "surface";
+static const char g_kKeyUuid[] = "uuid";
+static const char g_kKeyAppId[] = "appid";
 
 static void _on_hangup_static(void *closure, struct afb_wsj1 *wsj)
 {
@@ -80,9 +83,9 @@ Binding::~Binding()
     {
         sd_event_unref(mploop);
     }
-    if(sp_websock != NULL)
+    if(this->wsj1 != NULL)
     {
-        afb_wsj1_unref(sp_websock);
+        afb_wsj1_unref(this->wsj1);
     }
 }
 
@@ -143,9 +146,9 @@ int Binding::initialize_websocket()
     minterface.on_call = _on_call_static;
     minterface.on_event = _on_event_static;
     string muri = "ws://localhost:" + to_string(mport) + "/api?token=" + mtoken;
-    sp_websock = afb_ws_client_connect_wsj1(mploop, muri.c_str(), &minterface, this);
+    this->wsj1 = afb_ws_client_connect_wsj1(mploop, muri.c_str(), &minterface, this);
     }
-    if(sp_websock == NULL)
+    if(this->wsj1 == NULL)
     {
         ELOG("Failed to create websocket connection");
         goto END;
@@ -160,14 +163,16 @@ END:
     return -1;
 }
 
-void Binding::set_event_handler(const WMHandler& wmh)
+#define EVENT_SYNC_DRAW_NUM 5
+
+void Binding::set_event_handler(const MyHandler& wmh)
 {
     // Subscribe
     const char* ev = "event";
 
     if(wmh.on_sync_draw != nullptr) {
         struct json_object* j = json_object_new_object();
-        json_object_object_add(j, ev, json_object_new_int(Event_SyncDraw));
+        json_object_object_add(j, ev, json_object_new_int(EVENT_SYNC_DRAW_NUM));
 
         int ret = afb_wsj1_call_j(this->wsj1, wmAPI, "wm_subscribe", j, _on_reply_static, this);
         if (0 > ret) {
@@ -175,7 +180,7 @@ void Binding::set_event_handler(const WMHandler& wmh)
         }
     }
 
-    if(wmh.new_request != nullptr) {
+    if(wmh.on_new_request != nullptr) {
         struct json_object* j = json_object_new_object();
         int ret = afb_wsj1_call_j(this->wsj1, mpPrvAPI, "subscribe", j, _on_reply_static, this);
         if (0 > ret) {
@@ -186,12 +191,12 @@ void Binding::set_event_handler(const WMHandler& wmh)
     // Register
     this->_wmh.on_reply = wmh.on_reply;
     this->_wmh.on_sync_draw = wmh.on_sync_draw;
-    this->_wmh.new_request = wmh.new_request;
+    this->_wmh.on_new_request = wmh.on_new_request;
 }
 
 int Binding::run_eventloop()
 {
-    if(mploop && sp_websock)
+    if(mploop && this->wsj1)
     {
         pthread_t thread_id;
         int ret = pthread_create(&thread_id, NULL, event_loop_run, mploop);
@@ -227,16 +232,11 @@ int Binding::run_eventloop()
 int Binding::call(const string& api, const string& verb, struct json_object* arg)
 {
     int ret;
-    if(!sp_websock)
+    if(!this->wsj1)
     {
         return -1;
     }
-    if (!has_verb(verb))
-    {
-        ELOG("verb doesn't exit");
-        return -1;
-    }
-    ret = afb_wsj1_call_j(sp_websock, api.c_str(), verb.c_str(), arg, _on_reply_static, this);
+    ret = afb_wsj1_call_j(this->wsj1, api.c_str(), verb.c_str(), arg, _on_reply_static, this);
     if (ret < 0) {
         ELOG("Failed to call verb:%s",verb.c_str());
     }
@@ -266,9 +266,17 @@ void Binding::on_event(void *closure, const char *event, struct afb_wsj1_msg *ms
         /* It's not us */
         return;
     }
-    struct json_object* contents = afb_wsj1_msg_object_j(msg);
+    struct json_object* object = afb_wsj1_msg_object_j(msg);
     if(ev.find(_new_req)) {
-        this->_wmh.on_new_request(contents);
+        json_object *j_val;
+        json_object_object_get_ex(object, g_kKeySurface, &j_val);
+        int surface_id = json_object_get_string(j_val);
+        json_object_object_get_ex(object, g_kKeyAppId, &j_val);
+        const char* appid  = json_object_get_string(j_val);
+        json_object_object_get_ex(object, g_kKeyUuid, &j_val);
+        const char* uuid = json_object_get_string(j_val);
+        NewRequest nw_req = {appid, uuid, surface_id};
+        this->_wmh.on_new_request(nw_req);
     }
     else if(ev.find(_sync_draw)) {
         json_object *j_val, *j_rect;

@@ -21,6 +21,8 @@ set(PROJECT_DESCRIPTION "Sample application for homescreen and windowmanager")
 set(PROJECT_URL "")
 set(CMAKE_CXX_FLAGS "-Wall -fpermissive")
 
+pkg_check_modules(AFB REQUIRED json-c libafbwsc libsystemd)
+
 #source directory
 aux_source_directory(src DIR_SRCS)
 
@@ -29,7 +31,6 @@ include_directories(include)
 
 #set extern libraries
 SET(LIBRARIES
-    libwindowmanager.so
     libEGL.so
     libGLESv2.so
     libm.so
@@ -44,7 +45,7 @@ SET(LIBRARIES
 add_executable(simple-egl ${DIR_SRCS})
 
 #add link library
-TARGET_LINK_LIBRARIES(simple-egl ${LIBRARIES})
+TARGET_LINK_LIBRARIES(simple-egl ${LIBRARIES} ${AFB_LIBRARIES})
 
 add_custom_command(TARGET simple-egl POST_BUILD
    COMMAND mkdir -p ${PROJECT_BINARY_DIR}/package/root/bin
