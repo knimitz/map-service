@@ -591,8 +591,8 @@ main(int argc, char **argv)
 
     init_egl(&display, &window);
 
-    /* wm = new LibWindowmanager();
-    if(init_bdg(wm, &window)!=0){
+    bdg = new Binding();
+    if(init_bdg(&window)!=0){
         fini_egl(&display);
         if (display.ivi_application)
             ivi_application_destroy(display.ivi_application);
@@ -601,7 +601,7 @@ main(int argc, char **argv)
         wl_registry_destroy(display.registry);
         wl_display_flush(display.display);
         return -1;
-    } */
+    }
 
     create_surface(&window);
     init_gl(&window);
