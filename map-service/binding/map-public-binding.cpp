@@ -39,6 +39,7 @@ static const char _verb_req_map[] = "request_map";
 static const char _key_appid[] = "appid";
 static const char _key_uuid[] = "uuid";
 static const char _key_mp_sfc[] = "map_surface";
+static const char _ev_map_created[] = "map_created";
 static unordered_map<string, shared_ptr<MapClient>> _client_list;
 
 static void request_map(afb_req_t r) {
@@ -55,21 +56,36 @@ static void request_map(afb_req_t r) {
     AFB_INFO("%s : %s", error, info);
     AFB_INFO("%s", json_object_get_string(resp));
 
+    req.success();
+}
+
+static void subscribe(afb_req_t r) {
+    AFB_DEBUG(__FUNCTION__);
+    afb::req req(r);
+    char* app_id = req.get_application_id();
     if(_client_list.count(app_id) == 0) {
         shared_ptr<MapClient> client = std::make_shared<MapClient>(req);
         _client_list[app_id] = client;
     }
-    req.success();
+    if(app_id) {
+        free(app_id);
+    }
 }
 
 static void on_map_created(const char* app, const char* uuid) {
     // Get client object
+    AFB_DEBUG(__FUNCTION__);
     auto client = _client_list[app];
-    json_object* resp = json_object_new_object();
-    json_object_object_add(resp, _key_mp_sfc, json_object_new_string(uuid));
-    client->push_map_created(resp);
-    /* afb::req req = client->get_req(uuid);
-    req.success(resp); */
+    if(client != nullptr) {
+        json_object* resp = json_object_new_object();
+        json_object_object_add(resp, _key_mp_sfc, json_object_new_string(uuid));
+        client->push_map_created(resp);
+        /* afb::req req = client->get_req(uuid);
+        req.success(resp); */
+    }
+    else {
+        AFB_WARNING("client not found");
+    }
 }
 
 int preinit(afb_api_t api) {
@@ -84,10 +100,11 @@ int init(afb_api_t api) {
 
 void on_event(afb_api_t api, const char* event, struct json_object *object)
 {
-    AFB_NOTICE(__FUNCTION__);
-    json_object *juuid, *jappid;
-    if(string(event) == "map_created")
+    AFB_DEBUG(__FUNCTION__);
+    AFB_INFO("%s, %s", event, json_object_get_string(object));
+    if(string(event).find(_ev_map_created) != string::npos)
     {
+        json_object *juuid, *jappid;
         if(json_object_object_get_ex(object, _key_uuid, &juuid) &&
            json_object_object_get_ex(object, _key_appid, &jappid)) {
             const char* appid = json_object_get_string(jappid);
@@ -99,6 +116,7 @@ void on_event(afb_api_t api, const char* event, struct json_object *object)
 
 const afb_verb_t verbs[] = {
     afb::verb("request_map", request_map, "request map with argument", AFB_SESSION_LOA_0),
+    afb::verb("subscribe", subscribe, "subscribe event", AFB_SESSION_LOA_0),
     afb::verbend()
 };
 

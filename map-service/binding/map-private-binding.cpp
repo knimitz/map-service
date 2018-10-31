@@ -100,6 +100,7 @@ static void request_map(afb_req_t r) {
         // Add surface, uuid
         json_object_object_add(j_ui_req, _key_srfc, json_object_new_int(surface));
         json_object_object_add(j_ui_req, _key_uuid, json_object_new_string(uuid));
+        json_object_object_add(j_ui_req, _key_appid, json_object_new_string(app_id));
         // ========= Add some request to UI process here ===========
 
         // =================================================
@@ -111,6 +112,7 @@ static void request_map(afb_req_t r) {
         char* test_info, *test_err;
         jtest = json_object_new_object();
         json_object_object_add(jtest, _key_uuid, json_object_new_string(uuid));
+        json_object_object_add(jtest, _key_appid, json_object_new_string(app_id));
         // This is test because I don't implement UI process, so UI process can't create surface now.
         afb::callsync(_to_myself, _verb_provide_surface, jtest, jresponse_test, test_info, test_err);
         AFB_INFO("response test : %s", json_object_get_string(jresponse_test));
