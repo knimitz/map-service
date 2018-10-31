@@ -47,9 +47,9 @@
 #include <unistd.h>
 #include <time.h>
 
-#include <libwindowmanager.h>
 
 #include <ilm/ivi-application-client-protocol.h>
+#include "binding.hpp"
 #include "hmi-debug.h"
 
 using namespace std;
@@ -61,8 +61,6 @@ string token = string("wm");
 
 string app_name = string("map-service");
 const char* main_role = "map-service";
-
-LibWindowmanager *wm;
 
 static const struct wl_interface *types[] = {
         NULL,
@@ -522,9 +520,9 @@ signal_int(int signum)
 }
 
 int
-init_wm(LibWindowmanager *wm, struct window *window)
+init_wm()
 {
-    HMI_DEBUG(log_prefix,"called");
+    /* HMI_DEBUG(log_prefix,"called");
 
     if (wm->init(port, token) != 0) {
         HMI_ERROR(log_prefix,"wm init failed. ");
@@ -554,7 +552,7 @@ init_wm(LibWindowmanager *wm, struct window *window)
         wm->endDraw(role);
     };
 
-    wm->setEventHandler(wmh);
+    wm->setEventHandler(wmh); */
 
     return 0;
 }
@@ -592,7 +590,7 @@ main(int argc, char **argv)
 
     init_egl(&display, &window);
 
-    wm = new LibWindowmanager();
+    /* wm = new LibWindowmanager();
     if(init_wm(wm, &window)!=0){
         fini_egl(&display);
         if (display.ivi_application)
@@ -602,7 +600,7 @@ main(int argc, char **argv)
         wl_registry_destroy(display.registry);
         wl_display_flush(display.display);
         return -1;
-    }
+    } */
 
     create_surface(&window);
     init_gl(&window);
@@ -615,7 +613,7 @@ main(int argc, char **argv)
 
     eglSwapBuffers(window.display->egl.dpy, window.egl_surface);
 
-    wm->activateWindow(main_role);
+    //wm->activateWindow(main_role);
 
     /* The mainloop here is a little subtle.  Redrawing will cause
      * EGL to read events so we can just call
