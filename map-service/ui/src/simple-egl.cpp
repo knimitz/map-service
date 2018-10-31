@@ -60,7 +60,7 @@ long port = 1700;
 static string token = string("wm");
 static string app_name = string("map-service");
 static const char* main_role = "map-service";
-Binding bdg;
+Binding *bdg;
 
 static const struct wl_interface *types[] = {
         NULL,
@@ -520,28 +520,22 @@ signal_int(int signum)
 }
 
 int
-init_wm()
+init_bdg(struct window *window)
 {
-    /* HMI_DEBUG(log_prefix,"called");
+    HMI_DEBUG(log_prefix,"called");
 
-    if (wm->init(port, token) != 0) {
-        HMI_ERROR(log_prefix,"wm init failed. ");
+    if (bdg->init(port, token) != 0) {
+        HMI_ERROR(log_prefix,"bdg init failed. ");
         return -1;
     }
 
-    g_id_ivisurf = wm->requestSurface(main_role);
-    if (g_id_ivisurf < 0) {
-        HMI_ERROR(log_prefix,"wm request surface failed ");
-        return -1;
-    }
-    HMI_DEBUG(log_prefix,"IVI_SURFACE_ID: %d ", g_id_ivisurf);
-
-    WMHandler wmh;
-    wmh.on_visible = [](const char* role, bool visible){
+    MyHandler handler;
+    handler.on_reply = [](json_object* j){
         // Sample code if user uses visible event
-        HMI_DEBUG(log_prefix, "role: %s, visible: %s", role, visible ? "true" : "false");
+        json_object* j_val;
+        HMI_DEBUG(log_prefix, "reply : %s", json_object_get_string(j));
     };
-    wmh.on_sync_draw = [wm, window](const char* role, const char* area, Rect rect) {
+    handler.on_sync_draw = [bdg, window](const char* role, const char* area, Rect rect) {
 
         HMI_DEBUG(log_prefix,"Surface %s got syncDraw! Area: %s. w:%d, h:%d", role, area, rect.width(), rect.height());
 
@@ -549,10 +543,17 @@ init_wm()
         window->geometry.width  = rect.width();
         window->geometry.height = rect.height();
 
-        wm->endDraw(role);
+        bdg->end_draw(role);
+    };
+    handler.on_new_request = [bdg](const NewRequest& req) {
+        // Get surface
+        int surface = req.surface_id;
+        // create and redaw surface
+        // call provide_surface
+        bdg->provide_surface(req);
     };
 
-    wm->setEventHandler(wmh); */
+    bdg->set_event_handler(handler);
 
     return 0;
 }
@@ -591,7 +592,7 @@ main(int argc, char **argv)
     init_egl(&display, &window);
 
     /* wm = new LibWindowmanager();
-    if(init_wm(wm, &window)!=0){
+    if(init_bdg(wm, &window)!=0){
         fini_egl(&display);
         if (display.ivi_application)
             ivi_application_destroy(display.ivi_application);

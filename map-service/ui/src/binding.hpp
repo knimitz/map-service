@@ -81,6 +81,8 @@ public:
     int init(int port, const std::string& token);
     void set_event_handler(const MyHandler& wmh);
     void subscribe_events();
+    void end_draw(const char* role);
+    void provide_surface(const NewRequest& req);
 
     using handler_asyncSetSourceState = std::function<void(int sourceID, int handle)>;
 

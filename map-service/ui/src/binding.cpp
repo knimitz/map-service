@@ -43,6 +43,7 @@ static const char g_kKeyDrawingRect[] = "drawing_rect";
 static const char g_kKeySurface[] = "surface";
 static const char g_kKeyUuid[] = "uuid";
 static const char g_kKeyAppId[] = "appid";
+static const char g_kKeyResponse[] = "response";
 
 static void _on_hangup_static(void *closure, struct afb_wsj1 *wsj)
 {
@@ -192,6 +193,12 @@ void Binding::set_event_handler(const MyHandler& wmh)
     this->_wmh.on_reply = wmh.on_reply;
     this->_wmh.on_sync_draw = wmh.on_sync_draw;
     this->_wmh.on_new_request = wmh.on_new_request;
+}
+
+void Binding::end_draw(const char* role) {
+}
+
+void Binding::provide_surface(const NewRequest& req) {
 }
 
 int Binding::run_eventloop()
