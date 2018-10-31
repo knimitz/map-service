@@ -60,7 +60,7 @@ set_target_properties(${TARGET_PUB_LIB}
         LINK_FLAGS "-Wl,-rpath,'$ORIGIN'"
 )
 
-### Create public binding
+### Create private binding
 
 add_library(${TARGET_LOCAL_LIB} MODULE
     map-private-binding.cpp)
