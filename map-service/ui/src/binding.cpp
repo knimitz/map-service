@@ -44,6 +44,7 @@ static const char g_kKeySurface[] = "surface";
 static const char g_kKeyUuid[] = "uuid";
 static const char g_kKeyAppId[] = "appid";
 static const char g_kKeyResponse[] = "response";
+static const char g_verb_endDraw[] = "endDraw";
 
 static void _on_hangup_static(void *closure, struct afb_wsj1 *wsj)
 {
@@ -196,9 +197,16 @@ void Binding::set_event_handler(const MyHandler& wmh)
 }
 
 void Binding::end_draw(const char* role) {
+    json_object* object = json_object_new_object();
+    json_object_object_add(object, g_kKeyDrawingName, json_object_new_string(role));
+    this->call(wmAPI, g_verb_endDraw, object);
 }
 
 void Binding::provide_surface(const NewRequest& req) {
+    json_object* object = json_object_new_object();
+    json_object_object_add(object, g_kKeyUuid, json_object_new_string(req.uuid.c_str()));
+    json_object_object_add(object, g_kKeyAppId, json_object_new_string(req.appid.c_str()));
+    this->call(wmAPI, g_verb_endDraw, object);
 }
 
 int Binding::run_eventloop()
