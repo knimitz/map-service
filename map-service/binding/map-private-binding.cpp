@@ -114,9 +114,9 @@ static void request_map(afb_req_t r) {
         json_object_object_add(jtest, _key_uuid, json_object_new_string(uuid));
         json_object_object_add(jtest, _key_appid, json_object_new_string(app_id));
         // This is test because I don't implement UI process, so UI process can't create surface now.
-        afb::callsync(_to_myself, _verb_provide_surface, jtest, jresponse_test, test_info, test_err);
+        /* afb::callsync(_to_myself, _verb_provide_surface, jtest, jresponse_test, test_info, test_err);
         AFB_INFO("response test : %s", json_object_get_string(jresponse_test));
-        json_object_put(jresponse_test);
+        json_object_put(jresponse_test); */
         ////////////////// test ////////////////////////
     }
     else {
