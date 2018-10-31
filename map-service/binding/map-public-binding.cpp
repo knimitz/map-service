@@ -42,6 +42,36 @@ static const char _key_mp_sfc[] = "map_surface";
 static const char _ev_map_created[] = "map_created";
 static unordered_map<string, shared_ptr<MapClient>> _client_list;
 
+typedef struct MapContext {
+    string name;
+    MapContext(const char *appName) {
+        name = appName;
+    }
+} MapContext;
+
+static void cbRemoveClientCtxt(void *data) {
+    MapContext *ctxt = (MapContext *)data;
+    if (ctxt == nullptr) {
+        return;
+    }
+    AFB_INFO("remove app %s", ctxt->name.c_str());
+
+    if(_client_list.count(ctxt->name) != 0) {
+        _client_list.erase(ctxt->name);
+    }
+    delete ctxt;
+}
+
+static void createSecurityContext(afb_req_t req, const char* appid) {
+    MapContext *ctxt = (MapContext *)afb_req_context_get(req);
+    if (!ctxt) {
+        // Create Security Context at first time
+        MapContext *ctxt = new MapContext(appid);
+        AFB_INFO("create session for %s", ctxt->name.c_str());
+        afb_req_context_set(req, ctxt, cbRemoveClientCtxt);
+    }
+}
+
 static void request_map(afb_req_t r) {
     AFB_DEBUG(__FUNCTION__);
     char *app_id, *error, *info;
@@ -64,6 +94,7 @@ static void subscribe(afb_req_t r) {
     afb::req req(r);
     char* app_id = req.get_application_id();
     if(_client_list.count(app_id) == 0) {
+        createSecurityContext(r, app_id);
         shared_ptr<MapClient> client = std::make_shared<MapClient>(req);
         _client_list[app_id] = client;
     }
